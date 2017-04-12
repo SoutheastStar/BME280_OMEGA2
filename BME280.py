@@ -251,8 +251,8 @@ class BME280(object):
     
     def read_temperatureF(self):
         UT = float(self.read_raw_temp())
-        var1 = ((adc_t) / 16384.0 - (self.dig_T1) / 1024.0) * (self.dig_T2)
-        var2 = (((adc_t) / 131072.0 - (self.dig_T1) / 8192.0) * ((self.adc_t)/131072.0 - (self.dig_T1)/8192.0)) * (self.dig_T3)
+        var1 = ((UT) / 16384.0 - (self.dig_T1) / 1024.0) * (self.dig_T2)
+        var2 = (((UT) / 131072.0 - (self.dig_T1) / 8192.0) * ((UT)/131072.0 - (self.dig_T1)/8192.0)) * (self.dig_T3)
         self.t_fine = (var1 + var2)
         tempC = (var1 + var2) / 5120.0
         tempF = tempC * 1.8 + 32
