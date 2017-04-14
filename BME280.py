@@ -73,6 +73,7 @@ class BME280(object):
         self._addr = addr
 
         self._load_calibration()
+        self._bme280_Setup()
         #self._i2c.writeByte(0x76, 0xF4, 0x3F)
         self.t_fine =0.0
 
@@ -144,9 +145,8 @@ class BME280(object):
         self.dig_H6 = b1[6]
         if self.dig_H6 > 127 :
             self.dig_H6 -= 256
-
-    
-    def read_raw_temp(self):
+        
+    def _bme280_Setup(self)
         # BME280 address, 0x76(118)
         # Select control humidity register, 0xF2(242)
         #		0x01(01)	Humidity Oversampling = 1
@@ -160,9 +160,9 @@ class BME280(object):
         # Select Configuration register, 0xF5(245)
         #		0xA0(00)	Stand_by time = 1000 ms
         self._i2c.writeByte(self._addr, 0xF5, 0xA0)
-
-        #time.sleep(0.5)
-
+        time.sleep(0.5)
+    
+    def read_raw_temp(self):
         # BME280 address, 0x76(118)
         # Read data back from 0xF7(247), 8 bytes
         # Pressure MSB, Pressure LSB, Pressure xLSB, Temperature MSB, Temperature LSB
@@ -170,31 +170,15 @@ class BME280(object):
         data = self._i2c.readBytes(self._addr, 0xF7, 8)
 
         # Convert pressure and temperature data to 19-bits
-        adc_p = ((data[0] * 65536) + (data[1] * 256) + (data[2] & 0xF0)) / 16
+        #adc_p = ((data[0] * 65536) + (data[1] * 256) + (data[2] & 0xF0)) / 16
         adc_t = ((data[3] * 65536) + (data[4] * 256) + (data[5] & 0xF0)) / 16
 
         # Convert the humidity data
-        adc_h = data[6] * 256 + data[7]       
+        #adc_h = data[6] * 256 + data[7]       
         return adc_t
 
     def read_raw_pressure(self):
         # BME280 address, 0x76(118)
-        # Select control humidity register, 0xF2(242)
-        #		0x01(01)	Humidity Oversampling = 1
-        self._i2c.writeByte(self._addr, 0xF2, 0x01)
-        # BME280 address, 0x76(118)
-        # Select Control measurement register, 0xF4(244)
-        #		0x27(39)	Pressure and Temperature Oversampling rate = 1
-        #					Normal mode
-        self._i2c.writeByte(self._addr, 0xF4, 0x27)
-        # BME280 address, 0x76(118)
-        # Select Configuration register, 0xF5(245)
-        #		0xA0(00)	Stand_by time = 1000 ms
-        self._i2c.writeByte(self._addr, 0xF5, 0xA0)
-
-        #time.sleep(0.5)
-
-        # BME280 address, 0x76(118)
         # Read data back from 0xF7(247), 8 bytes
         # Pressure MSB, Pressure LSB, Pressure xLSB, Temperature MSB, Temperature LSB
         # Temperature xLSB, Humidity MSB, Humidity LSB
@@ -202,38 +186,22 @@ class BME280(object):
 
         # Convert pressure and temperature data to 19-bits
         adc_p = ((data[0] * 65536) + (data[1] * 256) + (data[2] & 0xF0)) / 16
-        adc_t = ((data[3] * 65536) + (data[4] * 256) + (data[5] & 0xF0)) / 16
+        #adc_t = ((data[3] * 65536) + (data[4] * 256) + (data[5] & 0xF0)) / 16
 
         # Convert the humidity data
-        adc_h = data[6] * 256 + data[7]       
+        #adc_h = data[6] * 256 + data[7]       
         return adc_p
 
     def read_raw_humidity(self):
         # BME280 address, 0x76(118)
-        # Select control humidity register, 0xF2(242)
-        #		0x01(01)	Humidity Oversampling = 1
-        self._i2c.writeByte(self._addr, 0xF2, 0x01)
-        # BME280 address, 0x76(118)
-        # Select Control measurement register, 0xF4(244)
-        #		0x27(39)	Pressure and Temperature Oversampling rate = 1
-        #					Normal mode
-        self._i2c.writeByte(self._addr, 0xF4, 0x27)
-        # BME280 address, 0x76(118)
-        # Select Configuration register, 0xF5(245)
-        #		0xA0(00)	Stand_by time = 1000 ms
-        self._i2c.writeByte(self._addr, 0xF5, 0xA0)
-
-        #time.sleep(0.5)
-
-        # BME280 address, 0x76(118)
         # Read data back from 0xF7(247), 8 bytes
         # Pressure MSB, Pressure LSB, Pressure xLSB, Temperature MSB, Temperature LSB
         # Temperature xLSB, Humidity MSB, Humidity LSB
         data = self._i2c.readBytes(self._addr, 0xF7, 8)
 
         # Convert pressure and temperature data to 19-bits
-        adc_p = ((data[0] * 65536) + (data[1] * 256) + (data[2] & 0xF0)) / 16
-        adc_t = ((data[3] * 65536) + (data[4] * 256) + (data[5] & 0xF0)) / 16
+        #adc_p = ((data[0] * 65536) + (data[1] * 256) + (data[2] & 0xF0)) / 16
+        #adc_t = ((data[3] * 65536) + (data[4] * 256) + (data[5] & 0xF0)) / 16
 
         # Convert the humidity data
         adc_h = data[6] * 256 + data[7]       
