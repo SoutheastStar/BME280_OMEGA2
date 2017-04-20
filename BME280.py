@@ -16,12 +16,26 @@ import time
 #BME280 Default Address
 # addr = 0x76
 
-# Operating Modes
-BME280_OSAMPLE_1 = 1
-BME280_OSAMPLE_2 = 2
-BME280_OSAMPLE_4 = 3
-BME280_OSAMPLE_8 = 4
-BME280_OSAMPLE_16 = 5
+# Operating Modes Temp
+T_OSample_1 = 1
+T_OSample_2 = 2
+T_OSample_4 = 3
+T_OSample_8 = 4
+T_OSample_16 = 5
+
+# Operating Modes Pressure
+P_OSample_1 = 1
+P_OSample_2 = 2
+P_OSample_4 = 3
+P_OSample_8 = 4
+P_OSample_16 = 5
+
+# Operating Modes Humidity
+H_OSample_1 = 1
+H_OSample_2 = 2
+H_OSample_4 = 3
+H_OSample_8 = 4
+H_OSample_16 = 5
 
 # BME280 Registers
 
@@ -59,13 +73,25 @@ BME280_REGISTER_TEMP_DATA = 0xFA
 BME280_REGISTER_HUMIDITY_DATA = 0xFD
 
 class BME280(object):
-    def __init__(self, mode=BME280_OSAMPLE_1, addr=0x76):
-        #Check if Mode is valid
-        if mode not in [BME280_OSAMPLE_1, BME280_OSAMPLE_2, BME280_OSAMPLE_4,
-                        BME280_OSAMPLE_8, BME280_OSAMPLE_16]:
+    def __init__(self, addr=0x76, tMode=T_OSample_1, pMode=P_OSample_1, hMode=H_OSample_1):
+        #Check if the Modes are valid
+        if tMode not in [T_OSample_1, T_OSample_2, T_OSample_4,
+                        T_OSample_8, T_OSample_16]:
             raise ValueError(
-                'Unexpected mode value {0}.  Set mode to one of BME280_ULTRALOWPOWER, BME280_STANDARD, BME280_HIGHRES, or BME280_ULTRAHIGHRES'.format(mode))
-        self._mode = mode
+                'Unexpected Temperature mode value {0}.  Set mode to one of BME280_ULTRALOWPOWER, BME280_STANDARD, BME280_HIGHRES, or BME280_ULTRAHIGHRES'.format(mode))
+        self._tMode = tMode
+        if pMode not in [P_OSample_1, P_OSample_2, P_OSample_4,
+                        P_OSample_8, P_OSample_16]:
+            raise ValueError(
+                'Unexpected Pressure mode value {0}.  Set mode to one of BME280_ULTRALOWPOWER, BME280_STANDARD, BME280_HIGHRES, or BME280_ULTRAHIGHRES'.format(mode))
+        self._pMode = pMode
+        if hMode not in [H_OSample_1, H_OSample_2, H_OSample_4,
+                        H_OSample_8, H_OSample_16]:
+            raise ValueError(
+                'Unexpected Humidity mode value {0}.  Set mode to one of BME280_ULTRALOWPOWER, BME280_STANDARD, BME280_HIGHRES, or BME280_ULTRAHIGHRES'.format(mode))
+        self._hMode = hMode
+
+        
         #I2C Bus init
         self._i2c = onionI2C.OnionI2C()
 
@@ -147,7 +173,18 @@ class BME280(object):
             self.dig_H6 -= 256
         
     def _bme280_Setup(self):
-        # BME280 address, 0x76(118)
+        hMeas = self._hMode
+        self._i2c.writeByte(self._addr, BME280_REGISTER_CONTROL_HUM, hMeas)
+        meas = self._tMode << 5 | self._pMode << 2 | 1
+        self._i2c.writeByte(self._addr, BME280_REGISTER_CONTROL, meas)
+
+
+        sleep_time = 0.00125 + 0.0023 * (1 << self._tMode)
+        sleep_time = sleep_time + 0.0023 * (1 << self._pMode) + 0.000575
+        sleep_time = sleep_time + 0.0023 * (1 << self._hMode) + 0.000575
+        time.sleep(sleep_time)  # Wait the required time
+
+        '''# BME280 address, 0x76(118)
         # Select control humidity register, 0xF2(242)
         #		0x01(01)	Humidity Oversampling = 1
         self._i2c.writeByte(self._addr, 0xF2, 0x01)
@@ -160,7 +197,7 @@ class BME280(object):
         # Select Configuration register, 0xF5(245)
         #		0xA0(00)	Stand_by time = 1000 ms
         self._i2c.writeByte(self._addr, 0xF5, 0xA0)
-        time.sleep(0.5)
+        time.sleep(0.5)'''
     
     def read_raw_temp(self):
         # BME280 address, 0x76(118)
